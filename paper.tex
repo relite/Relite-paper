@@ -1,0 +1,313 @@
+%-----------------------------------------------------------------------------
+%
+%               Template for sigplanconf LaTeX Class
+%
+% Name:         sigplanconf-template.tex
+%
+% Purpose:      A template for sigplanconf.cls, which is a LaTeX 2e class
+%               file for SIGPLAN conference proceedings.
+%
+% Guide:        Refer to "Author's Guide to the ACM SIGPLAN Class,"
+%               sigplanconf-guide.pdf
+%
+% Author:       Paul C. Anagnostopoulos
+%               Windfall Software
+%               978 371-2316
+%               paul@windfall.com
+%
+% Created:      15 February 2005
+%
+%-----------------------------------------------------------------------------
+
+
+\documentclass{sigplanconf}
+
+% The following \documentclass options may be useful:
+
+% preprint      Remove this option only once the paper is in final form.
+% 10pt          To set in 10-point type instead of 9-point.
+% 11pt          To set in 11-point type instead of 9-point.
+% authoryear    To obtain author/year citation style instead of numeric.
+
+\usepackage{amsmath}
+\usepackage{listings}
+
+\begin{document}
+
+\special{papersize=8.5in,11in}
+\setlength{\pdfpageheight}{\paperheight}
+\setlength{\pdfpagewidth}{\paperwidth}
+
+\conferenceinfo{CONF 'yy}{Month d--d, 20yy, City, ST, Country} 
+\copyrightyear{20yy} 
+\copyrightdata{978-1-nnnn-nnnn-n/yy/mm} 
+\doi{nnnnnnn.nnnnnnn}
+
+% Uncomment one of the following two, if you are not going for the 
+% traditional copyright transfer agreement.
+
+%\exclusivelicense                % ACM gets exclusive license to publish, 
+                                  % you retain copyright
+
+%\permissiontopublish             % ACM gets nonexclusive license to publish
+                                  % (paid open-access papers, 
+                                  % short abstracts)
+
+\titlebanner{banner above paper title}        % These are ignored unless
+\preprintfooter{short description of paper}   % 'preprint' option specified.
+
+\title{Relite-The implementation of the R language, based on Delite}
+%\title{The extended Relite implementation, based on FastR language}
+%\subtitle{Subtitle}
+
+\authorinfo{Lidija Fodor}
+       %    {Department of Mathematics and Informatics,\\*
+        {    Faculty of Science, University of Novi Sad} 
+      %       Trg D. Obradovica 4, \\*
+      %       21000 Novi Sad, Serbia \\*
+      %       +381 21 4852868}
+           {lidija.fodor@dmi.uns.ac.rs}
+\authorinfo{Vojin Jovanovic}
+ %          {Affiliation2/3}
+	    {École Polytechnique Federale de Lausanne (EPFL)}
+           {vojin.jovanovic@epfl.ch}
+
+\maketitle
+
+\begin{abstract}
+As computer science evolves, other fields of science, technology and business relie increasingly on its achievments. It is particularly evident,
+when it comes to the need for fast and reliable domain specific software. R is a useful language for statistic analysis, but also has a 
+main performance issue. A  project named Relite, introduces remarkable performance improvement for R programming language, relying on the FastR 
+implementation of R, and using Delite as a tool to produce high performance Domain Specific Languages (DSLs). We present a set of ideas and concepts, 
+used to develop and improve Relite to its current state. Hopefully, this approach could provide an opportunity to use most of the functionalities of 
+standard R, in a more efiicient way.
+\end{abstract}
+
+%\category{CR-number}{subcategory}{third-level}
+
+% general terms are not compulsory anymore, 
+% you may leave them out
+%\terms
+%term1, term2
+
+\keywords
+Relite, FastR, R, language
+
+\section{Introduction}
+
+The need for a convinient data analysis tool is raising with the growth of the interest to perform efficient
+statistical caomputations and produce graphical represenatations, based on them. The R [1] programming language
+and environment appeared as a promissing tool to satisfy these requirements. It was designed as a successor to S,
+in 1993 by Ross Ihaka and Robert Gentleman [5]. R is an interpreted language, so end users can easily use it, 
+thanks to its command line interpreter. On the other hand, the programming aspects of R, provide extensibility over 
+existing functionalities.
+It combines a variety of language properties, as R is a dynamic, functional, object-oriented and lazy language at the same time. 
+Nevertheless, poor performance issues reduce the popularity of R. 
+Consider the following short example of R program:
+\begin{lstlisting}
+
+calc<-function(n){
+  for(i in seq(1:n)){
+    p<-sum(rep(i)) / mean(rep(n-i+1))
+    if(length(p))
+      cat(p, "\n")
+  }
+}
+calc(100000)
+\end{lstlisting}
+
+The execution time of this program is s, on . Consequently, the question whether it is possible to reduce it, arises naturally. 
+Language inefficiency can often lead to migration of programs to more efficient languages. This can be avoided, by providing
+better implementations of the language. Our aim is to create a brand new R language interpreter, using advanced tools as Delite and OptiML, 
+but still leaving the syntactic properties unchanged. Currently, we have implemented a subset of the language, and launched a set of simple
+R program examples. The results of our tests look quite promissing, as they show significant time saving.
+
+In this paper, we introduce Relite, a project that relies on the concepts of language virtualization in scala to build R as Domain Specific Language. 
+Modern concepts of programming require high level of data abstractions to generalize complex problems. On the other hand, the need for high performant
+computation raises the importance of specializing programs to particular environments. 
+The usage of run-time code generation approach via staging, ensures a place both for high level apstractions and optimizations. In addition, this approach
+opens perspectives for compiling and running our programs for execution on heterogeneous hardware. All the concepts are supported by building blocks under Relite,
+so that our focus is mainly on implementing the domain-specific knowledge.
+This paper makes the following contributions:
+
+\begin{itemize}
+\itemsep10pt
+  %\item \textit{}
+  \item \textit{Description of implementation decisions:} One of the most important aspects of building DSLs on top of predefined building-blocks is to find the
+							    most efficient way to maximize the use of their advantages. We discuss the possibilies of OptiML under Relite,
+							    and choose the most acceptable solutions.  According to implementation details, we can evaluate our decisions and solutions,
+							    from different aspects, making conclusions about their consequences to program behaviour. 
+							   % MOTIVATION
+%  \item \textit{Completion of Relite development:} The main challenge is to introduce missing elements to the implementation of Relite, and turning it from illustration of few basic concepts, to fully developed, working software for statistical analysis. We address this problem by progressively including solutions for different R concepts.
+%  \item \textit{Introduction of practically usable new R, with highly improved performance:} We accomplished to develop a complete implementation of Relite, which follows the same syntax rules as basic R, so the users can use it witouth any syntactical changes. Relite is now capable to execute every instruction and piece of code, in the same manner as R does.
+ % \item \textit{Implementation evaluation:}
+  \item \textit{Performance evaluation:} We examine execution times of different R programs, related to base R, FastR implementation and Relite. Also, we provide a performance 
+					  comparison of Relite and C programming language, as there is a significant number of R functionalities, implemented in C, as a consequence
+					  of performance issues of R programs. Our evaluation, serves as a proof that the first step to develop high-performant R language implementation
+					  witouth any changes to its syntax, is certainly made.
+  \item \textit{Practical proof of using efficient building blocks in domain-specific language development:} Relite practically demonstrates the advantages of using Delite and OptiML on top of it,
+													       to build embedded DSLs, witouth sacrificing effeciency. Our work can serve as an encouragement to language 
+													       developers to decide to explore the concepts described here, and build high-performance languages,
+													       easier and faster. This could be the solution to many other DSLs, that are experiencing same performance issues.
+  
+\end{itemize}
+
+\section{The R language}
+R is applicable to a vide range of areas in science and bussines. It supports a temendous set of functionalities, grouped into more than 4 000 packages, available from repositories. 
+Two such known repositories are Bioconductor and CRAN. 
+
+The language supports the basic primitive data types, including numeric, integer (subclass of numeric), character, logical and complex types. The base type is a vector, instead of the usual scalar.
+In addition to vectors, R supports complex data/structures as matrices, lists (collections of heterogenous data), factors, data frames (table-like sets of data) and environments (collections of 
+defined key-value) pairs. All values can have attributes, describing different properties, and represented as key-value mappings.
+The main determinants of R are its functional, object-oriented and dynamic properties. 
+
+\subsection{Functional aspects}
+Due to the functional nature of R, functions are treated as first-class entities, enabling their use in a same manner as values of other types. A function can be bound to a variable name and
+passed as an argument to another functions. The language uses lazy evaluation of function call arguments. This is achieved by promises, that are evaluated only at the moment their value is required.
+There is a high level of flexibility in terms of function parameters definition and use, as named parameters and default values and variable number for parameters are supported. 
+The language is lexically scoped, and relies on dynamic binding, with cintext sensitive lookup and referential transparency.
+
+\subsection{Dynamic aspects}
+R is a dynamically typed language, supporting dynamic evaluation of code and explicit environment manipulation from the code, as a data type. The dynamic nature of R, completely removes explicit type declarations
+from the program, and allows to assign values of different types to the same name. Dynamic evaluation is supported through a special function eval.
+
+\subsection{Object-oriented aspects}
+Two different object systems are supported, within R, the S3 and S4 systems. The Single dispatch generic function system (S3) i sthe older one. It does not introduces real object oriented concepts.
+Instead, a value can have a class atribute, that represents the classes to which it belongs. This is the way to define an order of resolution for methods, that are specific functions. The classes 
+and multi-methods object system (S4) is the younger one. It brings in real object-oriented concepts, including classes, that can have slots (fields), methods and instances, with the possibilities 
+for multiple inheritance. However, the current state of Relite is not focusing on object-oriented concepts, it rather strives to build a reliable implementation of base concepts first.
+
+\subsection{Performance}
+All these aspects of R gives an interesting, unique combination of features, that must be taken into account, when trying to build a completely new implementation of the language. 
+It is important to preserve caracteristic features, to make it essentially identical to the original one, but also invest serious effort to overcome the problems of efficiency.
+According to earlier analysis[], R can be even 500 times slower than C, where a signifficant amount of time goes on memory management. Garbage collection and heap allocation leads to enlarged memory
+consuption. Another aspects of memory issues are tightly bound to arguments duplication, and vector allocation for each single value. Nevertheless, R programs are very concise and easy to read and
+maintain. They are about 40 smaller than the same code in C. For this reason is it desirable to make R more efficient, rather than writing twice as much code in some general-purpose language, that 
+can be a serious challenge for non programmers, who make up a significant percentage of R users.
+
+\section{The building blocks for Relite}
+Relite uses the advantages of existing building blocks for building performance oriented DSLs on top of scala-virtualized. This enables focusing on details of realization of domain specific 
+concepts, instead of investing an enormous effort into an external DSL construction. On the other hand, the drawbacks of embedding DSLs inside a host language are obvous: domain knowledge 
+cannot be efficientlz used to specialization towards a specific architecture, because of the existance of the layer between - the host language. The solution is to make the host language
+as much as possible suitable for DSL implementation. This language property is called virtualization. Scala-virtualized prooves this concepts, as it enables construction of efficient embedded DSLs.
+
+
+\section{Developing the new language implementation}
+
+\section{Performance evaluation}
+%exploits optimizations, relying on code generation approach
+
+
+%An interesting approach to achieve this, called FastR[2], uses abstract syntax tree based evaluation. It introduces an R interpreter,
+%built on top of the Java virtual machine
+
+%FastR [2] was introduced, in order to enhance the performances of the language. It relies on Truffle[3] and shows general speed improvement, compared to R. As  a framework for language implementation for Java as host language, Truffle performs specialization, based on abstract syntax tree interpreattion. In fact, FastR provides a completelly new R virtual machine, written in Java. The advantages of FastR include the open-source nature of OpenJDK, on which it i s bases, as well as a good just-in-time (JIT) compiler in the background.
+
+%However, the speed of the FastR language can be increased more significantly, using Delite [4],  a compiler framework and runtime for parallel embedded domain-specific languages, that use Lightweight Modular Staging (LMS) [6]. The result is an accelerator of R, that basically parallelized some illustrative aspects of FastR, called Relite, where Delite was used to compile and optimize R code at runtime.
+
+%In this paper, we explore the amendments for Relite implementation, that ensure that all R concepts are completely covered. The developed enhanced Relite is ready to be used, in the same manner as basic R, but with noticeable performance improvement.
+
+\section{Related Work}
+Although parallel programing and different program optimization techniques already became a widely used practice in computer science, the history of Relite development is not too long, a. The concepts
+behind Relite are relativelly new
+
+An interesting approach, targeting the performance issues of R, is introduced by D. Eddelbuettel and C. Sanderson. It uses C++ package extensions, named Rcpp, combined with the Armadillo C++ matrix library, to easily convert linear 
+algebra algorithms from R to C++.
+
+The idea to introduce parallelisation to improve R, appears in the work of J. Li, X. Ma, S Yoginath, G. Kora and N.F. Samatov[]. They propose pR, a runtime framework for automatic and transparent 
+parallelisation.
+
+L. Jiang, P.B. Patel, G. Ostrouchov and F. Jamitzky[] described an approach, based on semiautomatic parallelisation, using pragmas in the code, similarly to OpenMP.
+
+Program specialization on interpreter level, by directly optimizing the R Virtual Machine, with the ORBIT VM extension is proposed by H. Wang, P. Wu and D. Padua[]. They strive to reduce allocation,
+by aggressive deletion of allocated objects, and shortening the instruction path lengths. The proposed ORBIT VM is based on interpreted execution, and represents a specialization Just In Time Compiler
+and runtime. The use of profile-driven techniques is signifficant here, with the focus on data representation and operation specialization.
+
+\section{Conclusions}
+The popularity of R language increased in recent years, but its poor performances often force rewriting applications in more efficient languages. The aim of our work is to overcome this issue, 
+by providing an inovative implementation of the language. We showed how building blocks as OptiML, and Delite and LMS behind it, can be used to build an embedded DSL in scala-virtualized. 
+The approach of multi-stage programming with code generation, enables effective specialization of the program, by bridging the gap between high-level DSLs and low level optimizations. The FastR AST 
+parser was used to process the string of input program, and OptiML types were used to evaluate the given AST and generate the program, using optimized operations, provided by Delite. Performances were 
+observed through a set of examples, and compared to performaces of the same GNU R and FastR programms. Also, the relationship between the effectiveness of an R program on Relite and the same program 
+written in C, was tested. The results showed a promissing performance improvement, that serves as an encouragement for further work on this project.
+
+%\appendix
+%\section{Appendix Title}
+
+%This is the text of the appendix, if you need one.
+
+%\acks
+
+%Acknowledgments, if needed.
+
+% We recommend abbrvnat bibliography style.
+
+\bibliographystyle{abbrvnat}
+
+% The bibliography should be embedded for final submission.
+
+\begin{thebibliography}{}
+\softraggedright
+
+%\bibitem[Smith et~al.(2009)Smith, Jones]{smith02}
+%P. Q. Smith, and X. Y. Jones. ...reference text...
+
+%\bibliography{refrences.bib}
+
+\bibitem[]{}
+F. Morandat, B. Hill, L. Osvald, J. Vitek. Evaluating the Design of the R Language. Objects and Functions For Data Analysis. ECOOP'12 Proceedings of the 26th European conference on Object-Oriented Programming, 104-131, 2012.
+
+\bibitem[]{}
+T. Kalibera, P. Maj, F. Morandat, J. Vitek. A fast abstract syntax tree interpreter for R. VEE '14 Proceedings of the 10th ACM SIGPLAN/SIGOPS international conference on Virtual execution environments, 89-102, 2014. 
+
+\bibitem[]{}
+T. Würthinger, C. Wimmer, A. Wöß, L. Stadler, G. Duboscq, C. Humer, G. Richards, D. Simon, M. Wolczko. One VM to rule them all. Onward! '13 Proceedings of the 2013 ACM international symposium on New ideas, new paradigms, and reflections on programming and software, 187-204, 2013.
+
+\bibitem[]{}
+H. Chafi, Z. DeVito, A. Moors, T. Rompf, A. K. Sujeeth, P. Hanrahan, M. Odersky, K. Olukotun. Language virtualization for heterogeneus paralell computing. OOPSLA '10 Proceedings of the ACM international conference on Object oriented programming systems languages and applications, 835-847, 2010. 
+
+\bibitem[]{}
+R. Ihaka and R. Gentleman. R: A language for data analysis and graphics.Journal of Computational and Graphical Statistics, 5(3):299-314, 1996.
+
+\bibitem[]{}
+T. Rompf, M. Odersky. Lightweight modular staging: a pragmatic approach to runtime code generation and compiled DSLs. GPCE '10 Proceedings of the ninth international conference on Generative programming and component engineering, 127-136, 2010. 
+
+\bibitem[]{}
+D. Eddelbuettel, C. Sanderson. RccpArmadillo: Accelerating R with High-Performance C++ Linear Algebra.Computational Statistics \& Data Analysis, Volume 71, 1054-1063, 2014.
+
+\bibitem[]{}
+H. Wang, P. Wu, D. Padua. Optimizing R VM: Allocation Removal and Path Length Reduction via Interpreter-level Specialization. CGO '14 Proceedings of Anuual IEEE/ACM International Symposium on Code Generation and Optimization, 295, 2014.
+
+\bibitem[]{}
+J. Li, X. Ma, S. Yoginath, G. Kora, N. F. Samatova. Transparent Runtime Parallelization of the R scripting Language. Journal of Parallel and Distributed Computing. 157-168.2014.
+
+\bibitem[]{}
+L. Jiang, P. B. Patel, G. Ostrouchov, F. Jamitzky. Proceedings of the 17th ACM SIGPLAN symposium on Principles and Practice of Parallel Programming. 335-336. 2012.
+
+\bibitem[]{}
+T. Rompf, A. K. Sujeeth, N. Amin, K. J. Brown, V. Jovanovic, HJ. Lee, M. Jonnalagedda, K. Olukotun, M. Odersky. Optimizing sata structures in high-level programs: new directions for extensible compilers based on staging. Proceedings of the 40th annual ACM SIGPLAN-SIGACT symposium on Principles of programming languages. 497-510. 2013.
+
+\bibitem[]{}
+T. Rompf, A. K. Sujeeth, H. Lee, K.J. Brown, H. Chafi, M. Odersky, K. Olukotun. Building-Blocks for Performance Orinted DSLs. DSL '11: IFIP Working Conference on Domain-Specific :anguages, 2011.
+
+\bibitem[]{}
+A. K. Sujeeth, K. J. Brown, H. Lee, T. Rompf, H. Chafi, M. Odersky, K. Olukotun. Delite: A Compiler Architecture for Performance-Oriented Embedded Domain-Soecific Languages.  ACM Transactions and Embedded Computing Systems (TECS), Volume 13. Article No. 134. 2014.
+
+\bibitem[]{}
+A. Moors, T. Rompf, P. Haller, M. Odersky. Scala-virtualized. Proceedings of ACM SIGPLAN 2012 workshop on Partial evaluation and program manipulation. 117-120. 2012.
+
+\bibitem[]{}
+N. D. Jones. An introduction to partial evaluation. ACM Computing Surveys (CSUR), Volume 28. 480-503. 1996.
+
+\end{thebibliography}
+
+
+\end{document}
+
+%                       Revision History
+%                       -------- -------
+%  Date         Person  Ver.    Change
+%  ----         ------  ----    ------
+
+%  2013.06.29   TU      0.1--4  comments on permission/copyright notices
+
